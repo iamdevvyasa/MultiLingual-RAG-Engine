@@ -9,12 +9,15 @@ This guide explains how to set up, run, and commit the aligned English-only inde
 Follow these exact steps to run the pipeline and upload the finished index to GitHub.
 
 ### Step 1: Install Git LFS (Large File Storage)
+
 Since the generated index files are too large for standard Git, we use Git LFS to upload them. Run this command once in your terminal:
+
 ```bash
 git lfs install
 ```
 
 Track index and database files with LFS:
+
 ```bash
 git lfs track "*.faiss"
 git lfs track "*.db"
@@ -23,6 +26,7 @@ git lfs track "*.db"
 ---
 
 ### Step 2: Configure the Environment (`.env`)
+
 Create a file named `.env` in the `indexing/` directory (or edit the existing one) and paste the following configuration.
 
 Replace `/your/custom/input/folder/path` and `/your/custom/output/folder/path` with the actual folder paths on your VM:
@@ -42,37 +46,45 @@ MISTRAL_API_KEY2=your_second_mistral_api_key_here
 # ... add keys up to MISTRAL_API_KEY50
 ```
 
-*Note: If you ever want to run a completely local CPU-only model without API keys, you can set `EMBEDDING_DIMENSION=384`, `EMBEDDING_MODEL=Xenova/bge-small-en-v1.5`, and `EMBEDDING_PROVIDER=local`.*
+_Note: If you ever want to run a completely local CPU-only model without API keys, you can set `EMBEDDING_DIMENSION=384`, `EMBEDDING_MODEL=Xenova/bge-small-en-v1.5`, and `EMBEDDING_PROVIDER=local`._
 
 ---
 
 ### Step 3: Run the Ingestion Workers (Shards 0-9)
+
 We split the embedding task into 10 parallel segments (shards) containing 300 rows each (total 3,000 Parquet rows, yielding ~30,000 passages).
 
 You can run them in separate terminals (recommended for safety so you can watch for crashes/errors) or launch them all at once in the background.
 
 #### Option A: Separate Terminals (Safer, Recommended)
+
 Open 10 terminal windows/tabs and run:
-* **Terminal 0**: `npx tsx aligned-index.ts shard 0`
-* **Terminal 1**: `npx tsx aligned-index.ts shard 1`
-* **Terminal 2**: `npx tsx aligned-index.ts shard 2`
-* **Terminal 3**: `npx tsx aligned-index.ts shard 3`
-* **Terminal 4**: `npx tsx aligned-index.ts shard 4`
-* **Terminal 5**: `npx tsx aligned-index.ts shard 5`
-* **Terminal 6**: `npx tsx aligned-index.ts shard 6`
-* **Terminal 7**: `npx tsx aligned-index.ts shard 7`
-* **Terminal 8**: `npx tsx aligned-index.ts shard 8`
-* **Terminal 9**: `npx tsx aligned-index.ts shard 9`
+
+- **Terminal 0**: `npx tsx aligned-index.ts shard 0`
+- **Terminal 1**: `npx tsx aligned-index.ts shard 1`
+- **Terminal 2**: `npx tsx aligned-index.ts shard 2`
+- **Terminal 3**: `npx tsx aligned-index.ts shard 3`
+- **Terminal 4**: `npx tsx aligned-index.ts shard 4`
+- **Terminal 5**: `npx tsx aligned-index.ts shard 5`
+- **Terminal 6**: `npx tsx aligned-index.ts shard 6`
+- **Terminal 7**: `npx tsx aligned-index.ts shard 7`
+- **Terminal 8**: `npx tsx aligned-index.ts shard 8`
+- **Terminal 9**: `npx tsx aligned-index.ts shard 9`
 
 #### Option B: Single Background Command (Quickest)
+
 Run this single command to start all 10 workers in the background (logs will be saved to `shard_0.log`, `shard_1.log`, etc.):
+
 ```bash
 for i in {0..9}; do npx tsx aligned-index.ts shard $i > shard_$i.log 2>&1 & done
 ```
-*(To stop all background workers at any time, run: `pkill -f aligned-index.ts`)*
+
+_(To stop all background workers at any time, run: `pkill -f aligned-index.ts`)_
 
 #### 📊 How to check progress:
+
 You can check completion percentages at any time by running:
+
 ```bash
 npx tsx aligned-index.ts status
 ```
@@ -80,7 +92,9 @@ npx tsx aligned-index.ts status
 ---
 
 ### Step 4: Merge the Shards
+
 Once all 10 shards show `✅ Completed` in the status log, combine them into a single index file:
+
 ```bash
 npx tsx aligned-index.ts merge
 ```
@@ -88,7 +102,9 @@ npx tsx aligned-index.ts merge
 ---
 
 ### Step 5: Inject Translation Metadata
+
 This step reads all 13 translation languages and syncs them into the database. It runs completely locally on your CPU and takes under 1 minute:
+
 ```bash
 npx tsx aligned-index.ts inject
 ```
@@ -96,6 +112,7 @@ npx tsx aligned-index.ts inject
 ---
 
 ### Step 6: Commit and Push to GitHub
+
 Now that the index files are built inside `indexes/aligned_english`, commit them using LFS and push to Git:
 
 ```bash
@@ -126,24 +143,24 @@ flowchart TD
     Start([Start Ingestion]) --> Scan[1. Scan & Sort 13 Parquet Files]
     Scan --> Workers[2. Process all files in parallel with Concurrency 13]
     Workers --> Load[3. Load/Create Checkpoint state.json]
-    
+
     Load --> Stream[4. Stream Parquet via DuckDB in 20-row segments]
     Stream --> Skip{Already Indexed?}
-    
+
     Skip -- Yes --> SkipRow[Skip row & read next]
     Skip -- No --> Unnest[5. Extract & unnest passages in JS]
-    
+
     Unnest --> Splitter[6. Chunk text: Short Keep Whole / Long Recursive Splitter]
     Splitter --> Batch[7. Slice chunks into safe batches of size 64]
-    
+
     Batch --> Coordinator[8. MistralKeyCoordinator: Acquire free cooled key]
     Coordinator --> POST[9. POST embeddings in parallel via Promise.all]
     POST --> Release[10. Release key & enforce 2s cooldown]
-    
+
     Release --> FAISS[11. Add vectors to FAISS index with stable IDs]
     FAISS --> SQLite[12. Write chunk metadata to SQLite]
     SQLite --> Checkpoint[13. Periodically write state.json & commit database]
-    
+
     Checkpoint --> End([Ingestion Completed])
 ```
 
@@ -173,12 +190,12 @@ The splitter uses:
 - `chunkSize = 700`
 - `chunkOverlap = 100`
 - separators in this priority order:
-    - blank lines
-    - newlines
-    - Hindi sentence enders (`। `, `॥ `)
-    - English punctuation (`. `, `? `, `! `)
-    - spaces
-    - characters
+  - blank lines
+  - newlines
+  - Hindi sentence enders (`। `, `॥ `)
+  - English punctuation (`. `, `? `, `! `)
+  - spaces
+  - characters
 
 So this is not a “semantic chunker” in the LLM-sense; it is a hierarchical recursive character splitter that tries to break text at meaningful boundaries before falling back to raw character splits.
 
@@ -241,13 +258,13 @@ The short answer is:
 
 From `config.ts`, the default root is:
 
-- `INDEX_ROOT = /data/hhgoa/indexes`
+- `INDEX_ROOT = /data/multilingual-rag/indexes`
 
 Then for each language, the script writes:
 
-- `/data/hhgoa/indexes/<language>/index.faiss`
-- `/data/hhgoa/indexes/<language>/metadata.db`
-- `/data/hhgoa/indexes/<language>/state.json`
+- `/data/multilingual-rag/indexes/<language>/index.faiss`
+- `/data/multilingual-rag/indexes/<language>/metadata.db`
+- `/data/multilingual-rag/indexes/<language>/state.json`
 
 And the orchestration in `index-pipeline.ts` does:
 
@@ -302,6 +319,6 @@ So the vector DB is not storing text in FAISS itself. FAISS stores numeric vecto
 5. Add vector + ID into FAISS
 6. Save the same chunk metadata into SQLite via `faiss_id`
 7. Periodically checkpoint:
-    - save the FAISS index
-    - checkpoint SQLite WAL
-    - save `state.json`
+   - save the FAISS index
+   - checkpoint SQLite WAL
+   - save `state.json`

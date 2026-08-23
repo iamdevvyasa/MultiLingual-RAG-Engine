@@ -239,7 +239,7 @@ useEffect(() => {
                 className="max-w-3xl text-center"
               >
                 <p className="mb-5 mt-8 text-xs font-medium uppercase tracking-[0.3em] text-[#08733F]/70">
-                  Voice RAG · HHGoa · 13 Languages
+                  Voice RAG · Multilingual RAG · 13 Languages
                 </p>
 
                <h1
@@ -289,7 +289,7 @@ useEffect(() => {
 
                 <p className="mx-auto mt-6 max-w-xl text-pretty text-sm leading-7 text-[#171717]/55 sm:text-base">
                   Speak naturally and we'll look through
-                  the HHGoa knowledge base to find an
+                  the multilingual knowledge base to find an
                   answer grounded in the data.
                 </p>
               </motion.div>

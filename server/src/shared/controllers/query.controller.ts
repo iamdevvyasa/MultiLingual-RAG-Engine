@@ -7,7 +7,7 @@ import logger from "../config/logger.config.js";
 import path from "node:path";
 import env from "../config/env.config.js";
 
-const INDEX_ROOT = env.INDEX_ROOT || "/data/hhgoa/indexes";
+const INDEX_ROOT = env.INDEX_ROOT || "/data/multilingual-rag/indexes";
 const loadedSearchers = new Map<string, LanguageSearcher>();
 
 /**

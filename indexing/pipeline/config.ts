@@ -39,11 +39,11 @@ function envInt(name: string, fallback: number): number {
 export const TRAIN_DIR = envString("TRAIN_DIR", "/data/hfData/train");
 
 // Destination for indexes. Kept in a distinct subtree
-// (hhgoa/indexes) from the source data (hfData/train) so
+// (multilingual-rag/indexes) from the source data (hfData/train) so
 // a recursive cleanup of one never touches the other —
 // they don't need to be on separate physical disks, just
 // separate paths that are never crossed by writes.
-export const INDEX_ROOT = envString("INDEX_ROOT", "/data/hhgoa/indexes");
+export const INDEX_ROOT = envString("INDEX_ROOT", "/data/multilingual-rag/indexes");
 
 // ─────────────────────────────────────────────
 // Embedding

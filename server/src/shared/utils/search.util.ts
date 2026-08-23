@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import env from "../config/env.config.js";
 import logger from "../config/logger.config.js";
 
-const INDEX_ROOT = env.INDEX_ROOT || "/data/hhgoa/indexes";
+const INDEX_ROOT = env.INDEX_ROOT || "/data/multilingual-rag/indexes";
 
 const requireLoc = createRequire(import.meta.url);
 let faiss: any;
