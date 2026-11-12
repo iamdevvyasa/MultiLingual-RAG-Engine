@@ -27,10 +27,10 @@ function AnswerView({
         </div>
 
         {/* Answer */}
-        <div className="rounded-3xl border border-[#08733F]/10 bg-white/40 p-6 shadow-2xl shadow-[#04552F]/10 backdrop-blur-xl sm:p-8">
+        <div className="rounded-3xl border border-[#6D5DFB]/15 bg-white/50 p-6 shadow-2xl shadow-[#30258F]/10 backdrop-blur-xl sm:p-8">
           <div className="mb-6 flex items-center justify-between gap-4">
             <div>
-              <p className="text-xs font-medium uppercase tracking-[0.2em] text-[#08733F]">
+              <p className="text-xs font-medium uppercase tracking-[0.2em] text-[#5C4BE7]">
                 Answer
               </p>
 
@@ -40,7 +40,7 @@ function AnswerView({
             </div>
 
             {grounded && (
-              <span className="rounded-full border border-[#08733F]/20 bg-[#08733F]/10 px-3 py-1.5 text-xs font-medium text-[#08733F]">
+              <span className="rounded-full border border-[#6D5DFB]/20 bg-[#6D5DFB]/10 px-3 py-1.5 text-xs font-medium text-[#5C4BE7]">
                 Grounded
               </span>
             )}

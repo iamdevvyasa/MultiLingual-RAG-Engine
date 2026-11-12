@@ -16,7 +16,7 @@ function useRagExperience() {
     setState(INITIAL_STATE);
   }, []);
 
-  const submitQuery = useCallback(async (payload) => {
+  const submitQuery = useCallback(async (payload, options = {}) => {
     setState((current) => ({
       ...current,
       isProcessing: true,
@@ -55,13 +55,28 @@ function useRagExperience() {
       if (isAudio) {
         const formData = new FormData();
         formData.append("audio", payload, "query.wav");
+        appendDocumentOptions(formData, options);
         body = formData;
       } else {
         headers["Content-Type"] = "application/json";
-        body = JSON.stringify({ query: payload, language: "en-IN" });
+        body = JSON.stringify({
+          query: payload,
+          language: "en-IN",
+          documentSessionId: options.documentSessionId,
+          selectedDocumentIds: options.selectedDocumentIds?.join(","),
+        });
       }
 
-      const response = await fetch(`${API_BASE}/api/query`, {
+      function appendDocumentOptions(formData, options) {
+        if (options.documentSessionId) {
+          formData.append("documentSessionId", options.documentSessionId);
+        }
+        if (options.selectedDocumentIds?.length) {
+          formData.append("selectedDocumentIds", options.selectedDocumentIds.join(","));
+        }
+      }
+
+      const response = await fetch(`${API_BASE}${options.endpoint || "/api/query"}`, {
         method: "POST",
         headers,
         body,
@@ -180,12 +195,17 @@ function useRagExperience() {
                   isProcessing: false,
                 }));
               }
-            } catch (e) {
+            } catch {
               // skip malformed JSON lines
             }
           }
         }
       }
+
+      setState((current) => ({
+        ...current,
+        isProcessing: false,
+      }));
     } catch (err) {
       setState((current) => ({
         ...current,

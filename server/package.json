@@ -9,6 +9,9 @@
         "start": "node dist/server.js",
         "dev": "tsx watch server.ts"
     },
+    "engines": {
+        "node": ">=22"
+    },
     "dependencies": {
         "@langchain/core": "^1.2.9",
         "@langchain/mistralai": "^1.2.0",
@@ -24,6 +27,8 @@
         "hpp": "^0.2.3",
         "morgan": "^1.10.0",
         "multer": "^2.2.0",
+        "mammoth": "^1.10.0",
+        "pdf-parse": "^1.1.1",
         "pino": "^9.6.0",
         "pino-http": "^10.4.0",
         "swagger-ui-express": "^5.0.1",

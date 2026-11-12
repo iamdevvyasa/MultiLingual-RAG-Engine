@@ -94,22 +94,22 @@ function Conversation({
                   duration: 0.45,
                   ease: [0.22, 1, 0.36, 1],
                 }}
-                className="space-y-7"
+                className="flex flex-col gap-7"
               >
                 {/* Assistant identity */}
                 <div className="flex items-center gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full border border-[#08733F]/20 bg-[#08733F]/10">
-                    <span className="text-[10px] font-semibold text-[#08733F]">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full border border-[#6D5DFB]/20 bg-[#6D5DFB]/10">
+                    <span className="text-[10px] font-semibold text-[#5C4BE7]">
                       R
                     </span>
                   </div>
 
                   <span className="text-xs font-medium uppercase tracking-[0.2em] text-[#171717]/45">
-                    RAG in Goa
+                    VaaniRAG
                   </span>
 
                   {message.grounded && (
-                    <span className="rounded-full border border-[#08733F]/20 bg-[#08733F]/10 px-2.5 py-1 text-[10px] font-medium text-[#08733F]">
+                    <span className="rounded-full border border-[#6D5DFB]/20 bg-[#6D5DFB]/10 px-2.5 py-1 text-[10px] font-medium text-[#5C4BE7]">
                       Grounded
                     </span>
                   )}
@@ -117,112 +117,112 @@ function Conversation({
 
                 {/* 1. Sources (Rendered First) */}
                 {message.sources?.length > 0 && (
-                  <div>
-                    <div className="mb-4 flex items-center justify-between">
-                      <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-[#171717]/40">
-                        Retrieved context
-                      </p>
-
-                      <span className="text-[10px] text-[#171717]/30">
-                        {message.sources.length} sources
-                      </span>
+                  <details className="order-2 rounded-2xl border border-[#6D5DFB]/15 bg-[#6D5DFB]/[0.035] p-5">
+                    <summary className="cursor-pointer text-[10px] font-medium uppercase tracking-[0.2em] text-[#171717]/55">
+                      Retrieved context ({message.sources.length} sources)
+                    </summary>
+                    <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                      {message.sources.map((source, index) => (
+                        <SourceCard
+                          key={source.chunk_id ?? source.id ?? index}
+                          source={source}
+                          index={index}
+                        />
+                      ))}
                     </div>
-
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      {message.sources.map(
-                        (source, index) => (
-                          <SourceCard
-                            key={
-                              source.chunk_id ??
-                              source.id ??
-                              index
-                            }
-                            source={source}
-                            index={index}
-                          />
-                        )
-                      )}
-                    </div>
-                  </div>
+                  </details>
                 )}
 
-                {/* 2. Pipeline Console (Rendered Second) */}
+                {/* Optional technical details */}
                 {message.statusUpdates && message.statusUpdates.length > 0 && (
-                  <PipelineConsole
-                    statusUpdates={message.statusUpdates}
-                    isProcessing={isProcessing && messages[messages.length - 1]?.id === message.id}
-                  />
+                  <details className="order-3 rounded-2xl border border-[#6D5DFB]/15 bg-[#6D5DFB]/[0.035] p-5">
+                    <summary className="cursor-pointer text-[10px] font-medium uppercase tracking-[0.2em] text-[#171717]/55">
+                      Pipeline execution logs
+                    </summary>
+                    <div className="mt-4">
+                      <PipelineConsole
+                        statusUpdates={message.statusUpdates}
+                        isProcessing={isProcessing && messages[messages.length - 1]?.id === message.id}
+                      />
+                    </div>
+                  </details>
                 )}
 
-                {/* 3. Latency Diagnostics (Rendered Third) */}
-                <LatencyDashboard
-                  performance={message.performance}
-                />
+                {message.performance && (
+                  <details className="order-4 rounded-2xl border border-[#6D5DFB]/15 bg-[#6D5DFB]/[0.035] p-5">
+                    <summary className="cursor-pointer text-left text-[10px] font-medium uppercase tracking-[0.2em] text-[#171717]/45">
+                      Performance diagnostics
+                    </summary>
+                    <div className="mt-4">
+                      <LatencyDashboard performance={message.performance} />
+                    </div>
+                  </details>
+                )}
 
-                {/* 4. Answer (Rendered Fourth / streaming at the end!) */}
-                <div className="max-w-3xl text-[15px] leading-8 text-[#171717]/80 sm:text-base">
+                {/* Main answer */}
+                <div className="order-1 max-w-3xl rounded-2xl border border-[#6D5DFB]/20 bg-white/60 p-6 text-[15px] leading-8 text-[#201A3D]/80 shadow-sm sm:text-base">
                   {message.content ? (
                     <ReactMarkdown
                       components={{
-                        p: ({ node, ...props }) => (
+                        p: (props) => (
                           <p
                             className="mb-4 last:mb-0"
                             {...props}
                           />
                         ),
 
-                        ul: ({ node, ...props }) => (
+                        ul: (props) => (
                           <ul
                             className="mb-4 list-disc space-y-1.5 pl-5"
                             {...props}
                           />
                         ),
 
-                        ol: ({ node, ...props }) => (
+                        ol: (props) => (
                           <ol
                             className="mb-4 list-decimal space-y-1.5 pl-5"
                             {...props}
                           />
                         ),
 
-                        li: ({ node, ...props }) => (
+                        li: (props) => (
                           <li {...props} />
                         ),
 
-                        strong: ({ node, ...props }) => (
+                        strong: (props) => (
                           <strong
                             className="font-semibold text-[#171717]"
                             {...props}
                           />
                         ),
 
-                        code: ({ node, inline, ...props }) =>
+                        code: ({ inline, ...props }) =>
                           inline ? (
                             <code
-                              className="rounded bg-[#08733F]/10 px-1.5 py-0.5 font-mono text-sm text-[#08733F]"
+                              className="rounded bg-[#6D5DFB]/10 px-1.5 py-0.5 font-mono text-sm text-[#5C4BE7]"
                               {...props}
                             />
                           ) : (
-                            <pre className="my-4 overflow-x-auto rounded-xl border border-[#08733F]/20 bg-[#04552F] p-4 font-mono text-xs text-[#F8F5E8]">
+                            <pre className="my-4 overflow-x-auto rounded-xl border border-[#6D5DFB]/20 bg-[#342B8F] p-4 font-mono text-xs text-[#F7F5FF]">
                               <code {...props} />
                             </pre>
                           ),
 
-                        h1: ({ node, ...props }) => (
+                        h1: (props) => (
                           <h1
                             className="mb-4 mt-6 text-xl font-bold text-[#171717]"
                             {...props}
                           />
                         ),
 
-                        h2: ({ node, ...props }) => (
+                        h2: (props) => (
                           <h2
                             className="mb-3 mt-5 text-lg font-bold text-[#171717]"
                             {...props}
                           />
                         ),
 
-                        h3: ({ node, ...props }) => (
+                        h3: (props) => (
                           <h3
                             className="mb-2 mt-4 text-base font-bold text-[#171717]"
                             {...props}
@@ -238,17 +238,17 @@ function Conversation({
                         <motion.span
                           animate={{ y: [0, -4, 0] }}
                           transition={{ duration: 0.6, repeat: Infinity, ease: "easeInOut" }}
-                          className="block h-1.5 w-1.5 rounded-full bg-[#08733F]"
+                          className="block h-1.5 w-1.5 rounded-full bg-[#6D5DFB]"
                         />
                         <motion.span
                           animate={{ y: [0, -4, 0] }}
                           transition={{ duration: 0.6, repeat: Infinity, ease: "easeInOut", delay: 0.15 }}
-                          className="block h-1.5 w-1.5 rounded-full bg-[#08733F]"
+                          className="block h-1.5 w-1.5 rounded-full bg-[#6D5DFB]"
                         />
                         <motion.span
                           animate={{ y: [0, -4, 0] }}
                           transition={{ duration: 0.6, repeat: Infinity, ease: "easeInOut", delay: 0.3 }}
-                          className="block h-1.5 w-1.5 rounded-full bg-[#08733F]"
+                          className="block h-1.5 w-1.5 rounded-full bg-[#6D5DFB]"
                         />
                         <span className="ml-1 text-xs">Formulating response...</span>
                       </div>
@@ -312,18 +312,18 @@ function LatencyDashboard({ performance }) {
   }
 
   return (
-    <div className="my-6 rounded-2xl border border-[#08733F]/15 bg-[#08733F]/[0.035] p-5 backdrop-blur-md">
+    <div className="my-6 rounded-2xl border border-[#6D5DFB]/15 bg-[#6D5DFB]/[0.035] p-5 backdrop-blur-md">
       <div className="grid gap-5 md:grid-cols-3">
 
         {/* Left card */}
-        <div className="flex flex-col justify-center rounded-xl border border-[#08733F]/10 bg-[#08733F]/[0.04] p-4 text-center md:col-span-1">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-[#08733F]">
+        <div className="flex flex-col justify-center rounded-xl border border-[#6D5DFB]/10 bg-[#6D5DFB]/[0.04] p-4 text-center md:col-span-1">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-[#5C4BE7]">
             Index Retrieval Time
           </span>
 
           <span className="mt-2 font-mono text-2xl font-bold tracking-tight text-[#171717]">
             {retrievalTime.toFixed(4)}{" "}
-            <span className="text-sm font-medium text-[#08733F]">
+            <span className="text-sm font-medium text-[#5C4BE7]">
               ms
             </span>
           </span>
@@ -334,7 +334,7 @@ function LatencyDashboard({ performance }) {
         </div>
 
         {/* Right card */}
-        <div className="flex flex-col justify-between rounded-xl border border-[#08733F]/10 bg-[#08733F]/[0.04] p-4 md:col-span-2">
+        <div className="flex flex-col justify-between rounded-xl border border-[#6D5DFB]/10 bg-[#6D5DFB]/[0.04] p-4 md:col-span-2">
           <span className="mb-3 block text-[10px] font-bold uppercase tracking-wider text-[#171717]/50">
             RAG Pipeline Latency Diagnostics
           </span>
@@ -345,7 +345,7 @@ function LatencyDashboard({ performance }) {
             <div>
               <div className="mb-1 flex justify-between font-mono text-[10px] text-[#171717]/60">
                 <span className="flex items-center gap-1.5">
-                  <Search className="h-3.5 w-3.5 shrink-0 text-[#08733F]" />
+                  <Search className="h-3.5 w-3.5 shrink-0 text-[#5C4BE7]" />
                   <span>
                     Vector Similarity Search (FAISS)
                   </span>
@@ -356,9 +356,9 @@ function LatencyDashboard({ performance }) {
                 </span>
               </div>
 
-              <div className="h-1 w-full overflow-hidden rounded-full bg-[#08733F]/[0.08]">
+              <div className="h-1 w-full overflow-hidden rounded-full bg-[#6D5DFB]/[0.08]">
                 <div
-                  className="h-full rounded-full bg-[#08733F]"
+                  className="h-full rounded-full bg-[#6D5DFB]"
                   style={{
                     width: `${Math.min(
                       100,
@@ -375,7 +375,7 @@ function LatencyDashboard({ performance }) {
             <div>
               <div className="mb-1 flex justify-between font-mono text-[10px] text-[#171717]/60">
                 <span className="flex items-center gap-1.5">
-                  <Database className="h-3.5 w-3.5 shrink-0 text-[#08733F]" />
+                  <Database className="h-3.5 w-3.5 shrink-0 text-[#5C4BE7]" />
                   <span>
                     SQL metadata & translations (SQLite)
                   </span>
@@ -386,9 +386,9 @@ function LatencyDashboard({ performance }) {
                 </span>
               </div>
 
-              <div className="h-1 w-full overflow-hidden rounded-full bg-[#08733F]/[0.08]">
+              <div className="h-1 w-full overflow-hidden rounded-full bg-[#6D5DFB]/[0.08]">
                 <div
-                  className="h-full rounded-full bg-[#08733F]"
+                  className="h-full rounded-full bg-[#6D5DFB]"
                   style={{
                     width: `${Math.min(
                       100,
@@ -402,7 +402,7 @@ function LatencyDashboard({ performance }) {
             </div>
 
             {/* Pipeline info */}
-            <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-[#08733F]/10 pt-2.5 font-mono text-[9px] text-[#171717]/40">
+            <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-[#6D5DFB]/10 pt-2.5 font-mono text-[9px] text-[#171717]/40">
 
               {sttTime > 0 && (
                 <span className="flex items-center gap-1">
@@ -442,11 +442,11 @@ function LatencyDashboard({ performance }) {
               </span>
 
               <span className="ml-auto flex items-center gap-1">
-                <Zap className="h-3 w-3 shrink-0 animate-pulse text-[#08733F]" />
+                <Zap className="h-3 w-3 shrink-0 animate-pulse text-[#5C4BE7]" />
 
                 <span>
                   Full RAG Loop:{" "}
-                  <strong className="font-bold text-[#08733F]">
+                  <strong className="font-bold text-[#5C4BE7]">
                     {totalTime.toFixed(4)}ms
                   </strong>
                 </span>
@@ -475,15 +475,15 @@ function PipelineConsole({
   }, [statusUpdates.length]);
 
   return (
-    <div className="rounded-2xl border border-[#08733F]/15 bg-white/40 p-5 font-mono text-[11px] text-[#171717]/80 shadow-md">
-      <div className="mb-3 flex items-center justify-between border-b border-[#08733F]/10 pb-2 text-[10px] uppercase tracking-wider text-[#171717]/50 font-bold">
+    <div className="rounded-2xl border border-[#6D5DFB]/15 bg-white/40 p-5 font-mono text-[11px] text-[#171717]/80 shadow-md">
+      <div className="mb-3 flex items-center justify-between border-b border-[#6D5DFB]/10 pb-2 text-[10px] uppercase tracking-wider text-[#171717]/50 font-bold">
         <span>
           RAG Pipeline Execution Logs (SSE Stream)
         </span>
 
         {isProcessing ? (
-          <span className="flex items-center gap-1.5 text-[#08733F]">
-            <span className="h-1.5 w-1.5 animate-ping rounded-full bg-[#08733F]" />
+          <span className="flex items-center gap-1.5 text-[#5C4BE7]">
+            <span className="h-1.5 w-1.5 animate-ping rounded-full bg-[#5C4BE7]" />
             Streaming Live
           </span>
         ) : (
@@ -493,7 +493,7 @@ function PipelineConsole({
         )}
       </div>
 
-      <div className="max-h-48 space-y-2 overflow-y-auto pr-2 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-[#08733F]/20">
+      <div className="max-h-48 space-y-2 overflow-y-auto pr-2 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-[#6D5DFB]/20">
         {statusUpdates.map((update, idx) => {
           const date = new Date(update.timestamp);
 
@@ -524,10 +524,10 @@ function PipelineConsole({
 
           if (isDone) {
             prefixIcon = (
-              <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#08733F]" />
+              <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#5C4BE7]" />
             );
 
-            color = "text-[#08733F]";
+            color = "text-[#5C4BE7]";
           } else if (isFailed) {
             prefixIcon = (
               <X className="mt-0.5 h-3.5 w-3.5 shrink-0 text-red-500" />
@@ -562,7 +562,7 @@ function PipelineConsole({
               <span className="whitespace-pre-wrap break-all">
                 {update.message}
                 {update.latency !== undefined && (
-                  <span className="ml-2 rounded bg-[#08733F]/10 px-1 py-0.5 text-[9px] font-semibold text-[#08733F]/70">
+                  <span className="ml-2 rounded bg-[#6D5DFB]/10 px-1 py-0.5 text-[9px] font-semibold text-[#5C4BE7]/70">
                     {update.latency}ms
                   </span>
                 )}

@@ -18,8 +18,8 @@ function OrbVisual({
           inset-[5%]
           z-0
           rounded-full
-          bg-[#08733F]/20
-          blur-[50px]
+          bg-[#52616B]/15
+          blur-[36px]
         "
         animate={{
           scale: isListening
@@ -46,10 +46,10 @@ function OrbVisual({
           h-full
           w-full
           rounded-full
-          bg-[#0B6839]
+          bg-gradient-to-br from-[#687983] to-[#46545D]
+          shadow-[0_12px_30px_rgba(47,62,70,0.18)]
           border
-          border-white/10
-          shadow-[0_0_80px_rgba(8,115,63,0.25)]
+          border-[#D8DEE1]/70
           select-none
         "
         animate={{
@@ -68,8 +68,21 @@ function OrbVisual({
         }}
       />
 
+      <motion.div
+        aria-hidden="true"
+        className="absolute inset-[7%] z-20 rounded-full border border-[#D8DEE1]/45"
+        animate={{
+          rotate: isListening ? 360 : [0, 360],
+          scale: isListening ? 1 + level * 0.04 : [1, 1.03, 1],
+        }}
+        transition={{
+          rotate: { duration: isListening ? 5 : 14, repeat: Infinity, ease: "linear" },
+          scale: { duration: 3.5, repeat: Infinity, ease: "easeInOut" },
+        }}
+      />
+
       {/* Face */}
-      <div className="absolute inset-0 z-20">
+      <div className="absolute inset-0 z-30">
         <OrbFace
           level={level}
           isListening={isListening}

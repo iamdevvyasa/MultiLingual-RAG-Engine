@@ -89,7 +89,7 @@ function SoundWave({
           return (
             <motion.span
               key={index}
-             className="block w-[3px] shrink-0 rounded-full bg-gradient-to-t from-[#023B20]/30 via-[#04552F] to-[#08733F]"
+             className="block w-[3px] shrink-0 rounded-full bg-gradient-to-t from-[#52616B]/25 via-[#687983] to-[#8A6F9E]"
               animate={{
                 height: isActive
                   ? Math.max(

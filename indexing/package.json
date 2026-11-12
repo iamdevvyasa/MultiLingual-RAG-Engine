@@ -5,7 +5,11 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "index": "npx tsx index.ts"
+    "index": "npx tsx index.ts",
+    "demo": "npx tsx pipeline/create-demo-index.ts"
+  },
+  "engines": {
+    "node": ">=22"
   },
   "keywords": [],
   "author": "",

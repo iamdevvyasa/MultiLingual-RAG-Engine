@@ -50,9 +50,9 @@ function VoiceOrb({
         rounded-full
         outline-none
         focus-visible:ring-2
-        focus-visible:ring-[#FF0080]
+        focus-visible:ring-[#8A6F9E]
         focus-visible:ring-offset-4
-        focus-visible:ring-offset-[#F8F5E8]
+        focus-visible:ring-offset-[#F1F3F4]
       "
     >
       <OrbVisual

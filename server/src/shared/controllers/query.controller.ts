@@ -6,6 +6,7 @@ import { ModelHarness } from "../utils/harness.util.js";
 import logger from "../config/logger.config.js";
 import path from "node:path";
 import env from "../config/env.config.js";
+import { searchDocuments } from "../services/document.service.js";
 
 const INDEX_ROOT = env.INDEX_ROOT || "/data/multilingual-rag/indexes";
 const loadedSearchers = new Map<string, LanguageSearcher>();
@@ -110,6 +111,26 @@ export async function handleQuery(req: Request, res: Response): Promise<void> {
 
         logger.info({ queryText, userLanguage, sttMs }, "Query received");
 
+        const documentSessionId = String(req.body?.documentSessionId || "").trim();
+        const selectedDocumentIds = String(req.body?.selectedDocumentIds || "")
+            .split(",")
+            .map((id) => id.trim())
+            .filter(Boolean);
+
+        if (documentSessionId) {
+            await handleUploadedDocumentQuery({
+                queryText,
+                userLanguage,
+                documentSessionId,
+                selectedDocumentIds,
+                pipelineStart,
+                sttMs,
+                sendEvent,
+                res,
+            });
+            return;
+        }
+
         // 3. Scan completed indexes on disk dynamically
         const availableIndexes = scanAvailableIndexes();
         const baseLang = userLanguage.split("-")[0]?.toLowerCase() || "en";
@@ -121,6 +142,83 @@ export async function handleQuery(req: Request, res: Response): Promise<void> {
             });
             res.end();
             return;
+        }
+
+        interface UploadedQueryOptions {
+            queryText: string;
+            userLanguage: string;
+            documentSessionId: string;
+            selectedDocumentIds: string[];
+            pipelineStart: number;
+            sttMs: number;
+            sendEvent: (event: string, data: any) => void;
+            res: Response;
+        }
+
+        async function handleUploadedDocumentQuery(options: UploadedQueryOptions): Promise<void> {
+            const {
+                queryText,
+                userLanguage,
+                documentSessionId,
+                selectedDocumentIds,
+                pipelineStart,
+                sttMs,
+                sendEvent,
+                res,
+            } = options;
+            const searchStart = performance.now();
+            const results = searchDocuments(documentSessionId, selectedDocumentIds, queryText, 5);
+            const searchMs = Number((performance.now() - searchStart).toFixed(4));
+
+            sendEvent("status", {
+                step: "document_search_done",
+                message: `[Selected Document Search] took ${searchMs} ms. Found ${results.length} matches.`,
+                timestamp: Date.now(),
+                latency: searchMs,
+            });
+
+            const totalMs = Number((performance.now() - pipelineStart).toFixed(4));
+            sendEvent("metadata", {
+                query: queryText,
+                userLanguage,
+                searchedDocuments: selectedDocumentIds,
+                sttMs,
+                translationMs: 0,
+                searchMs,
+                embedMs: 0,
+                retrieveMs: 0,
+                totalMs,
+                citations: results.map((result) => ({
+                    chunk_id: result.chunk_id,
+                    score: result.score,
+                    text: result.text,
+                    document_id: result.document_id,
+                    document_name: result.document_name,
+                    chunk_index: result.chunk_index,
+                })),
+            });
+
+            const contextString = results
+                .map((result, index) => `[Source ${index + 1} - ${result.document_name}]: ${result.text}`)
+                .join("\n\n");
+            const systemPrompt = `You are a document question-answering assistant.
+        Answer only from the selected document context below. If the context does not contain the answer, say that the selected documents do not provide enough information.
+        Answer in the user's language: ${userLanguage}.
+
+        Selected document context:
+        ${contextString}`;
+
+            sendEvent("status", {
+                step: "prompt_given",
+                message: "Answer generation started from the selected documents.",
+                timestamp: Date.now(),
+            });
+            for await (const chunk of streamChatCompletion(systemPrompt, queryText, true)) {
+                sendEvent("chunk", { text: chunk });
+            }
+            sendEvent("status", { step: "generate_done", message: "Document-grounded response completed.", timestamp: Date.now() });
+            sendEvent("done", {});
+            res.end();
         }
 
         let translationNeeded = baseLang !== "en";

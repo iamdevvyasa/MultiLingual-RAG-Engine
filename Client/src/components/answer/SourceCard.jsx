@@ -10,24 +10,30 @@ function SourceCard({
       : null;
 
   return (
-    <article className="group rounded-2xl border border-[#08733F]/10 bg-white/40 p-5 transition-all duration-300 hover:border-[#FF0080]/30 hover:bg-white/60">
+    <article className="group rounded-2xl border border-[#6D5DFB]/15 bg-white/40 p-5 transition-all duration-300 hover:border-[#FF6B8A]/40 hover:bg-white/60">
       <div className="mb-4 flex items-center justify-between gap-4">
         <div className="flex items-center gap-2">
-          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#08733F]/10 text-[10px] font-semibold text-[#08733F]">
+          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#6D5DFB]/10 text-[10px] font-semibold text-[#5C4BE7]">
             {index + 1}
           </span>
 
           <span className="text-xs font-medium text-[#171717]/50">
-            Retrieved context
+            {source.document_name || "Retrieved context"}
           </span>
         </div>
 
         {score !== null && (
-          <span className="text-xs font-medium text-[#08733F]/80">
+          <span className="text-xs font-medium text-[#5C4BE7]/80">
             {score}% match
           </span>
         )}
       </div>
+
+      {source.document_name && (
+        <p className="mb-3 text-[11px] text-[#171717]/40">
+          Section {Number(source.chunk_index ?? 0) + 1} · selected document
+        </p>
+      )}
 
       <p className="line-clamp-5 text-sm leading-6 text-[#171717]/55 transition-colors group-hover:text-[#171717]/80">
         {source.text}
@@ -46,7 +52,7 @@ function SourceCard({
             .map(([key, value]) => (
               <span
                 key={key}
-                className="rounded-full border border-[#08733F]/10 bg-[#08733F]/[0.04] px-2.5 py-1 text-[10px] text-[#171717]/40"
+                className="rounded-full border border-[#6D5DFB]/10 bg-[#6D5DFB]/[0.04] px-2.5 py-1 text-[10px] text-[#201A3D]/40"
               >
                 {key}: {String(value)}
               </span>

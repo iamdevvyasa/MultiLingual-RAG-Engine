@@ -238,7 +238,7 @@ useEffect(() => {
                 }}
                 className="max-w-3xl text-center"
               >
-                <p className="mb-5 mt-8 text-xs font-medium uppercase tracking-[0.3em] text-[#08733F]/70">
+                <p className="mb-5 mt-8 text-xs font-medium uppercase tracking-[0.3em] text-[#5C4BE7]/75">
                   Voice RAG · Multilingual RAG · 13 Languages
                 </p>
 
@@ -411,8 +411,8 @@ useEffect(() => {
                 bottom-0
                 h-40
                 bg-gradient-to-t
-                from-[#F8F5E8]
-                via-[#F8F5E8]/95
+                from-[#F1F3F4]
+                via-[#F1F3F4]/95
                 to-transparent
               "
             />
@@ -516,15 +516,15 @@ function StatusText({
     className =
       "mb-3 text-sm text-red-600";
   } else if (isProcessing) {
-    text = "Looking through the Goa knowledge base...";
+    text = "Looking through the VaaniRAG knowledge base...";
 
     className =
-      "mb-3 text-sm text-[#08733F]";
+      "mb-3 text-sm text-[#5C4BE7]";
   } else if (isActive) {
     text = "Listening...";
 
     className =
-      "mb-3 text-sm text-[#08733F]";
+      "mb-3 text-sm text-[#5C4BE7]";
   } else if (compact) {
     text = "Ask another question";
   }

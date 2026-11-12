@@ -46,7 +46,7 @@ function useAudioAnalyser() {
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
       try {
         mediaRecorderRef.current.stop();
-      } catch (e) {
+      } catch {
         // ignore errors on early stop
       }
       mediaRecorderRef.current = null;
