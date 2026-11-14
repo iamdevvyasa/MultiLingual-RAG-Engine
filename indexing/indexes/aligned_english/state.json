@@ -1,5 +1,6 @@
 {
   "language": "aligned_english",
   "sourceFile": "built-in demo knowledge base",
-  "completed": true
+  "completed": true,
+  "totalChunks": 45
 }
